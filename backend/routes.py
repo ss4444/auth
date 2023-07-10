@@ -3,7 +3,7 @@ import jwt
 from managers.users import authenticate_user, get_user_current
 from models import User
 import asyncpg
-from schemas import UserAllInfo, UserGet, UserAuth, UserEdit, PredictMel, PredictRod, CheckEmail, CheckAnswer
+from schemas import UserAllInfo, UserGet, UserAuth, UserEdit, CheckEmail, CheckAnswer
 from passlib.hash import bcrypt
 import ormar
 
@@ -16,13 +16,13 @@ router = APIRouter(
 
 @router.post('/')
 async def auth(data: UserAuth):
-    user = await authenticate_user(data.username, data.password_hash)
+    user = await authenticate_user(data.username, data.password)
     if not user:
         return {'error' : 'invaid credentials'}
     user = UserGet(
         id=str(user.id),
         username=user.username,
-        password_hash=user.password_hash
+        password=user.password
     )
     token = jwt.encode(user.dict(), JWT_SECRET)
     return {'access_token' : token, 'token_type' : 'bearer'}
@@ -31,7 +31,7 @@ async def auth(data: UserAuth):
 @router.post('/reg')
 async def register(user: UserAllInfo):
     try:
-        user.password_hash = bcrypt.hash(user.password_hash)
+        user.password = bcrypt.hash(user.password)
         user_dict = user.dict()
         await User.objects.create(**user_dict)
     except asyncpg.exceptions.UniqueViolationError:
@@ -50,8 +50,8 @@ async def check_username(username: CheckEmail):
 
 @router.patch('/me')
 async def user_edit(new_user: UserEdit, user=Depends(get_user_current)):
-    if new_user.password_hash:
-        new_user.password_hash = bcrypt.hash(new_user.password_hash)
+    if new_user.password:
+        new_user.password = bcrypt.hash(new_user.password)
     user = await User.objects.get(id=user.id)
     try:
         await user.update(**{k: v for k, v in new_user.dict().items() if v})

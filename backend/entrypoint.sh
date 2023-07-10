@@ -7,6 +7,10 @@ while ! nc -z "$POSTGRES_HOST" "$POSTGRES_PORT"; do
 done
 echo "PostgreSQL started"
 
+if [ "$APP_TYPE" = "HTTP" ]; then
+  alembic upgrade head
+fi
+
 python main.py
 
 exec "$@"

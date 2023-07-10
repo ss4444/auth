@@ -22,10 +22,8 @@ def upgrade():
     sa.Column('id', sa.CHAR(32), nullable=False),
     sa.Column('last_name', sa.String(length=50), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
-    sa.Column('patronymic', sa.String(length=50), nullable=True),
-    sa.Column('birthday', sa.String(length=1000), nullable=True),
     sa.Column('username', sa.String(length=50), nullable=False, unique=True),
-    sa.Column('password_hash', sa.String(length=128), nullable=False),
+    sa.Column('password', sa.String(length=128), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
 
